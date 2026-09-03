@@ -37,7 +37,7 @@ use writable::*;
 #[cfg(feature = "cursor_controls")]
 mod writable {
 	use std::io::{self, Write};
-	use lexical_core::FormattedSize;
+	use lexical_write_integer::{FormattedSize, ToLexical};
 
 	#[cfg(any(feature = "cursor_controls", feature = "erase_functions"))]
 	pub(super) const CSI: &'static [u8] = b"\x1b[";
@@ -58,7 +58,7 @@ mod writable {
 		fn write_to<W: Write>(&self, writer: &mut W) -> io::Result<()> {
 			let mut buf = [0u8; u16::FORMATTED_SIZE_DECIMAL];
 
-			let bytes = lexical_core::write(*self, &mut buf);
+			let bytes = self.to_lexical(&mut buf);
 
 			writer.write_all(&*bytes)
 		}

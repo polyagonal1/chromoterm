@@ -30,7 +30,7 @@ all-features = true
 rustdoc-args = ["--cfg", "docsrs"]
 
 [dependencies]
-lexical-core = { version = "1", features = ["write-integers", "std"], default-features = false }
+lexical-write-integer = { version = "1", features = ["std"], default-features = false }
 rustix = { version = "1", features = ["stdio", "termios"], optional = true }
 
 

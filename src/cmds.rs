@@ -18,12 +18,17 @@
 
 #[cfg(feature = "cursor_controls")]
 mod cursor;
+
 #[cfg(feature = "alternate_screen")]
+#[cfg_attr(docsrs, doc(cfg(feature = "alternate_screen")))]
 pub mod screen;
+
 #[cfg(feature = "erase_functions")]
+#[cfg_attr(docsrs, doc(cfg(feature = "erase_functions")))]
 pub mod erase;
 
 #[cfg(feature = "cursor_controls")]
+#[cfg_attr(docsrs, doc(cfg(feature = "cursor_controls")))]
 pub use cursor::CursorControls;
 
 #[cfg(feature = "cursor_controls")]

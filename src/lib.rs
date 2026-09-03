@@ -16,6 +16,8 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>
 */
 
+#![cfg_attr(docsrs, feature(doc_cfg))]
+
 //! This is a low-level terminal manipulation library that aims to be simple to 
 //! use and ergonomic and fast. ('Low-level' meaning that it does not provide 
 //! any sort of TUI, just the commands used to make the TUI.)
@@ -25,12 +27,19 @@
 
 #[cfg(feature = "any_cmds")]
 mod cmds;
+
 #[cfg(feature = "raw_mode")]
+#[cfg_attr(docsrs, doc(cfg(feature = "raw_mode")))]
 pub mod terminal_mode;
+
 #[cfg(feature = "window_size")]
+#[cfg_attr(docsrs, doc(cfg(feature = "window_size")))]
 pub mod winsize;
+
+
 
 #[cfg(feature = "any_cmds")]
 pub use cmds::*;
+
 #[cfg(feature = "raw_mode")]
 pub use terminal_mode::raw;

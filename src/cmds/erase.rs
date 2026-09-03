@@ -41,6 +41,7 @@ use std::io::{self, Write};
 ///
 /// [alternate screen]: crate::screen
 #[cfg(feature = "erase_in_display")]
+#[cfg_attr(docsrs, doc(cfg(feature = "erase_in_display")))]
 pub trait ClearInDisplay {
 	/// Clears the whole display. 
 	/// 
@@ -51,6 +52,7 @@ pub trait ClearInDisplay {
 	/// 
 	/// This does not normally clear scrollback when in the main screen.
 	#[cfg(feature = "erase_in_display_ext")]
+	#[cfg_attr(docsrs, doc(cfg(feature = "erase_in_display_ext")))]
 	fn clear_from_cursor_to_end(&mut self) -> io::Result<()>;
 	
 	/// Clears from the start of the display to the cursor. 
@@ -58,6 +60,7 @@ pub trait ClearInDisplay {
 	/// Like [`ClearInDisplay::clear_from_cursor_to_end`], this does not
 	/// normally clear scrollback when in the main screen.
 	#[cfg(feature = "erase_in_display_ext")]
+	#[cfg_attr(docsrs, doc(cfg(feature = "erase_in_display_ext")))]
 	fn clear_from_start_to_cursor(&mut self) -> io::Result<()>;
 }
 
@@ -67,16 +70,19 @@ pub trait ClearInDisplay {
 /// things like loading bars when in the main screen when you don't want to 
 /// clear everything, just re-render a specific line.
 #[cfg(feature = "erase_in_line")]
+#[cfg_attr(docsrs, doc(cfg(feature = "erase_in_line")))]
 pub trait ClearInLine {
 	/// Clears the line the cursor is currently on.
 	fn clear_line(&mut self) -> io::Result<()>;
 
 	/// Clears from the cursor to the end of the line the cursor is on.
 	#[cfg(feature = "erase_in_line_ext")]
+	#[cfg_attr(docsrs, doc(cfg(feature = "erase_in_line_ext")))]
 	fn clear_from_cursor_to_line_end(&mut self) -> io::Result<()>;
 
 	/// Clears from the start of the line the cursor is on to the cursor.
 	#[cfg(feature = "erase_in_line_ext")]
+	#[cfg_attr(docsrs, doc(cfg(feature = "erase_in_line_ext")))]
 	fn clear_from_line_start_to_cursor(&mut self) -> io::Result<()>;
 }
 
@@ -87,11 +93,13 @@ impl<W: Write> ClearInDisplay for W {
 	}
 
 	#[cfg(feature = "erase_in_display_ext")]
+	#[cfg_attr(docsrs, doc(cfg(feature = "erase_in_display_ext")))]
 	fn clear_from_cursor_to_end(&mut self) -> io::Result<()> {
 		self.write_all(b"\x1b[0J")
 	}
 
 	#[cfg(feature = "erase_in_display_ext")]
+	#[cfg_attr(docsrs, doc(cfg(feature = "erase_in_display_ext")))]
 	fn clear_from_start_to_cursor(&mut self) -> io::Result<()> {
 		self.write_all(b"\x1b[1J")
 	}

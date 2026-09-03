@@ -25,6 +25,10 @@ categories = ["command-line-interface"]
 readme = "README.md"
 license = "GPL-3.0-or-later"
 
+[package.metadata.docs.rs]
+all-features = true
+rustdoc-args = ["--cfg", "docsrs"]
+
 [dependencies]
 lexical-core = { version = "1", features = ["write-integers", "std"], default-features = false }
 rustix = { version = "1", features = ["stdio", "termios"], optional = true }

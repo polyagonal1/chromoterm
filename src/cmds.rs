@@ -27,14 +27,18 @@ pub mod screen;
 #[cfg_attr(docsrs, doc(cfg(feature = "erase_functions")))]
 pub mod erase;
 
+#[cfg(feature = "style")]
+#[cfg_attr(docsrs, doc(cfg(feature = "style")))]
+pub mod style;
+
 #[cfg(feature = "cursor_controls")]
 #[cfg_attr(docsrs, doc(cfg(feature = "cursor_controls")))]
 pub use cursor::CursorControls;
 
-#[cfg(feature = "cursor_controls")]
+#[cfg(any(feature = "cursor_controls", feature = "style"))]
 use writable::*;
 
-#[cfg(feature = "cursor_controls")]
+#[cfg(any(feature = "cursor_controls", feature = "style"))]
 mod writable {
 	use std::io::{self, Write};
 	use lexical_write_integer::{FormattedSize, ToLexical};
@@ -43,20 +47,44 @@ mod writable {
 	pub(super) const CSI: &'static [u8] = b"\x1b[";
 	
 	pub(super) trait Writeable {
-		fn write_to<W: Write>(&self, writer: &mut W) -> io::Result<()>;
+		fn write_to<W: Write>(self, writer: &mut W) -> io::Result<()>;
 	}
 
-	impl Writeable for [u8] {
+	impl<T: Writeable + Copy> Writeable for &T {
+		fn write_to<W: Write>(self, writer: &mut W) -> io::Result<()> {
+			(*self).write_to(writer)
+		}
+	}
+
+	impl Writeable for &[u8] {
 		#[inline]
-		fn write_to<W: Write>(&self, writer: &mut W) -> io::Result<()> {
+		fn write_to<W: Write>(self, writer: &mut W) -> io::Result<()> {
 			writer.write_all(self)
+		}
+	}
+
+	impl<const N: usize> Writeable for [u8; N] {
+		#[inline]
+		fn write_to<W: Write>(self, writer: &mut W) -> io::Result<()> {
+			self.as_slice().write_to(writer)
 		}
 	}
 
 	impl Writeable for u16 {
 		#[inline]
-		fn write_to<W: Write>(&self, writer: &mut W) -> io::Result<()> {
-			let mut buf = [0u8; u16::FORMATTED_SIZE_DECIMAL];
+		fn write_to<W: Write>(self, writer: &mut W) -> io::Result<()> {
+			let mut buf = [0u8; u16::FORMATTED_SIZE];
+
+			let bytes = self.to_lexical(&mut buf);
+
+			writer.write_all(&*bytes)
+		}
+	}
+
+	impl Writeable for u8 {
+		#[inline]
+		fn write_to<W: Write>(self, writer: &mut W) -> io::Result<()> {
+			let mut buf = [0u8; u8::FORMATTED_SIZE];
 
 			let bytes = self.to_lexical(&mut buf);
 
@@ -72,7 +100,8 @@ mod writable {
 			)* $(,)?
 		) => {
 			$(
-				$item.write_to($writer)?;
+				// $item.write_to($writer)?;
+				crate::cmds::Writeable::write_to($item, $writer)?;
 			)*
 		}
 	}

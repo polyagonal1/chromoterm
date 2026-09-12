@@ -71,6 +71,8 @@ pub trait ClearInDisplay {
 /// clear everything, just re-render a specific line.
 #[cfg(feature = "erase_in_line")]
 #[cfg_attr(docsrs, doc(cfg(feature = "erase_in_line")))]
+// ISSUE: Any additions to these traits, including those in other modules is a
+// breaking change
 pub trait ClearInLine {
 	/// Clears the line the cursor is currently on.
 	fn clear_line(&mut self) -> io::Result<()>;

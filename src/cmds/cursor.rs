@@ -18,13 +18,14 @@
 
 use std::io::{self, Write};
 
-use super::{CSI, Writeable, write_all};
+use super::{CSI, write_all};
 
 /// Cursor movement.
 ///
 /// This trait has methods which allow the cursor to be moved more expressively
 /// by the program than it would be otherwise. It is automatically implemented
 /// for any type implementing [`Write`].
+// See comment in erase.rs about future compatibility
 pub trait CursorControls {
 	/// Moves the cursor to the top-left corner of the screen.
 	///

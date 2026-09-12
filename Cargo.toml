@@ -31,7 +31,8 @@ rustdoc-args = ["--cfg", "docsrs"]
 
 [dependencies]
 lexical-write-integer = { version = "1", features = ["std"], default-features = false }
-rustix = { version = "1", features = ["stdio", "termios"], optional = true }
+constcat = "0.6"
+rustix = { version = "1", features = ["stdio", "termios", "std"], optional = true }
 
 
 
@@ -44,6 +45,7 @@ window_size = ["rustix"]
 
 alternate_screen = ["any_cmds"]
 cursor_controls = ["any_cmds"]
+style = ["any_cmds"]
 
 erase_in_display_ext = ["erase_in_display"]
 erase_in_line_ext = ["erase_in_line"]

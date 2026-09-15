@@ -19,33 +19,54 @@
 //! Utilities for styling text
 //! 
 //! The main entrypoint for styling text in this module is the [`SetStyle`]
-//! trait
+//! trait. It is automatically implemented for any [writer][Write]. 
+//! 
+//! The three modules in this module all contain different styles that text 
+//! can have, like underlines, bold mode, the color of the text, etc. All the 
+//! types in those modules implement the [`Style`] trait which is what the 
+//! methods in [`SetStyle`] work over.
+//! 
+//! # Examples
+//! ```
+//! use std::io::{self, Write};
+//! use chromoterm::style::{
+//! 	SetStyle,
+//! 	general::Italic,
+//! 	underlines::{StraightUnderline, NoUnderline},
+//! 	colors::{
+//! 		standard::*,
+//! 		standard_bright::*,
+//! 	},
+//! };
+//!
+//! let mut stdout = io::stdout().lock();
+//!
+//! writeln!(stdout, "Normally styled text")?;
+//!
+//! stdout.set_standalone(StraightUnderline)?;
+//! writeln!(stdout, "Underlined text")?;
+//!
+//! stdout.setter()
+//! 	.set(NoUnderline)?
+//! 	.set(Italic)?
+//! 	.set(GreenFg)?
+//! 	.set(BrightBlueBg)?;
+//!
+//! writeln!(stdout, "Green italicised text with a bright blue background")?;
+//!
+//! stdout.reset_style()?;
+//!
+//! writeln!(stdout, "Normally styled text")?;
+//!
+//! Ok::<(), io::Error>(())
+//! ```
+
+use std::io::{self, Write};
+use style_inner::StyleInner;
+
 pub mod general;
 pub mod underlines;
 pub mod colors;
-
-use std::io::{self, Write};
-
-use style_inner::StyleInner;
-
-/// Represents a style that text can be in, like bold mode or the color of the 
-/// text
-pub trait Style: StyleInner {}
-
-mod style_inner {
-	use std::io::{self, Write};
-	
-	pub trait StyleInner {
-
-		fn set_standalone<W: Write>(&self, writer: W) -> io::Result<()>;
-
-		fn set_with_csi<W: Write>(&self, writer: W) -> io::Result<()>;
-
-		fn set_with_semicolon<W: Write>(&self, writer: W) -> io::Result<()>;
-
-		fn set_with_end<W: Write>(&self, writer: W) -> io::Result<()>;
-	}
-}
 
 /// Trait allowing text to be styled. It is automatically implemented on any
 /// writer.
@@ -102,11 +123,29 @@ pub trait SetStyle: Write {
 	/// # Examples
 	/// ```
 	/// use std::io::{self, Write};
-	/// # use chromoterm::style::{SetStyle};
+	/// use chromoterm::style::{
+	/// 	SetStyle,
+	/// 	general::Bold,
+	/// 	colors::{
+	/// 		standard::*,
+	/// 		standard_bright::*,
+	/// 	}
+	/// };
 	///
 	/// let mut stdout = io::stdout().lock();
 	///
+	/// stdout.setter()
+	/// 	.set(BrightYellowFg)?
+	/// 	.set(BlueBg)?
+	/// 	.set(Bold)?;
 	///
+	/// writeln!(stdout, "Bold, bright yellow text with a blue background")?;
+	///
+	/// stdout.reset_style()?;
+	///
+	/// writeln!(stdout, "Normally styled text")?;
+	///
+	/// # Ok::<(), io::Error>(())
 	/// ```
 	fn setter<'a>(&'a mut self) -> StyleSetter<&'a mut Self> {
 		StyleSetter {
@@ -130,17 +169,50 @@ pub trait SetStyle: Write {
 	///
 	/// # Ok::<(), io::Error>(())
 	/// ```
-	fn set_standalone<S: Style>(&mut self, mode: S) -> io::Result<()> {
-		mode.set_standalone(self)
+	fn set_standalone<S: Style>(&mut self, style: S) -> io::Result<()> {
+		style.set_standalone(self)
 	}
 
-	/// Resets the
+	/// Resets the style to the default. 
+	/// 
+	/// # Examples
+	/// ```
+	/// use std::io::{self, Write};
+	/// # use chromoterm::style::{SetStyle, general::Bold};
+	///
+	/// let mut stdout = io::stdout().lock();
+	///
+	/// stdout.set_standalone(Bold)?;
+	///
+	/// stdout.reset_style()?;
+	///
+	/// writeln!(stdout, "Normally styled (not bold) text")
+	/// ```
 	fn reset_style(&mut self) -> io::Result<()> {
 		self.write_all(b"\x1b[0m")
 	}
 }
 
 impl<W: Write> SetStyle for W {}
+
+/// Represents a style that text can be in, like bold mode or the color of the 
+/// text.
+pub trait Style: StyleInner {}
+
+mod style_inner {
+	use std::io::{self, Write};
+
+	pub trait StyleInner {
+
+		fn set_standalone<W: Write>(&self, writer: W) -> io::Result<()>;
+
+		fn set_with_csi<W: Write>(&self, writer: W) -> io::Result<()>;
+
+		fn set_with_semicolon<W: Write>(&self, writer: W) -> io::Result<()>;
+
+		fn set_with_end<W: Write>(&self, writer: W) -> io::Result<()>;
+	}
+}
 
 /// Wrapper around a writer (but usually a mutable reference to a writer) which
 /// allows setting multiple styles with the same SGR sequence.
@@ -161,7 +233,7 @@ impl<'a, W: Write> Drop for StyleSetter<W> {
 }
 
 impl<'a, W: Write> StyleSetter<W> {
-	/// Set the given style
+	/// Set the given style.
 	pub fn set<S: Style>(mut self, mode: S) -> io::Result<Self> {
 		if self.has_any_style_been_set {
 			mode.set_with_semicolon(&mut self.writer)?;

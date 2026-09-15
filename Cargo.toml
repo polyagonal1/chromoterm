@@ -65,5 +65,9 @@ required-features = ["raw_mode"]
 
 
 [[bin]]
+name = "eight_bit_color_table"
+required-features = ["style"]
+
+[[bin]]
 name = "log_input"
 required-features = ["raw_mode"]

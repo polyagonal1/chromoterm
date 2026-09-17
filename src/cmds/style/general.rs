@@ -63,6 +63,6 @@ define_mode! {
 	/// Resets the effect of [`Invisible`].
 	Visible: b"28"
 
-	/// Resets the effect of [`ResetStrikethough`].
+	/// Resets the effect of [`ResetStrikethrough`].
 	ResetStrikethrough: b"29"
 }

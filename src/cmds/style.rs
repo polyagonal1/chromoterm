@@ -186,7 +186,9 @@ pub trait SetStyle: Write {
 	///
 	/// stdout.reset_style()?;
 	///
-	/// writeln!(stdout, "Normally styled (not bold) text")
+	/// writeln!(stdout, "Normally styled (not bold) text")?;
+	/// 
+	/// Ok::<(), io::Error>(())
 	/// ```
 	fn reset_style(&mut self) -> io::Result<()> {
 		self.write_all(b"\x1b[0m")
